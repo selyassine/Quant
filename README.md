@@ -22,6 +22,18 @@
 - **Assistant IA** (Groq, Llama 3.3 70B) avec **RAG** (ChromaDB, optionnel) et 5 outils : prédiction, optimisation de portefeuille, backtest, sentiment des actualités, explication SHAP.
 - **Production** : API FastAPI (14 modules, 60+ endpoints), PostgreSQL, Celery + Redis pour les tâches lourdes, suivi MLOps des modèles, rapports PDF (ReportLab), le tout lancé par Docker Compose.
 
+## Aperçu
+
+<p align="center">
+  <img src="docs/images/backtest_aapl.png" alt="Backtest des stratégies prédéfinies sur AAPL" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/risque_rendement.png" alt="Rendement et risque de 7 actifs" width="100%">
+</p>
+
+<sub>Graphiques produits par le moteur de backtest et le module de risque du projet, sur les deux ans de données journalières incluses dans <code>scripts/market_data_csv</code> (<code>python docs/generer_graphiques.py</code>). Backtest historique sur échantillon, sans frais de transaction : ce n'est pas une promesse de performance future.</sub>
+
 ## Architecture
 
 ```
