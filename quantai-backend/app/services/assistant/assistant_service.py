@@ -1,6 +1,6 @@
 """
 M11 — AI Financial Assistant
-Groq LLM (Llama 3.1 70B) + RAG (ChromaDB) + 5 financial tools.
+Groq LLM (Llama 3.3 70B) + RAG (ChromaDB) + 5 financial tools.
 
 Tools:
 1. get_prediction(ticker)     → ML ensemble prediction

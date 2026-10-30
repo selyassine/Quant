@@ -114,7 +114,7 @@ export default function AssistantPage() {
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
           <h1 className="text-xl font-semibold tracking-tight">AI Financial Assistant</h1>
-          <p className="text-sm text-muted mt-1">Powered by Claude API · 5 financial tools · RAG</p>
+          <p className="text-sm text-muted mt-1">Propulsé par Groq (Llama 3.3 70B) · 5 outils financiers · RAG</p>
         </div>
         <button
           onClick={clearChat}
@@ -223,7 +223,7 @@ export default function AssistantPage() {
               </button>
             </div>
             <p className="text-xs text-muted mt-1 text-center">
-              Claude API · RAG + 5 tools: prediction, portfolio, backtest, news, SHAP
+              Groq Llama 3.3 · RAG + 5 outils : prédiction, portefeuille, backtest, actualités, SHAP
             </p>
           </div>
         </div>

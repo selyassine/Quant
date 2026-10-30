@@ -131,7 +131,7 @@ async def assistant_health():
     return {
         "status": "ok",
         "module": "AI Assistant M11",
-        "llm": "Groq llama-3.1-70b-versatile",
+        "llm": "Groq llama-3.3-70b-versatile",
         "rag": "ChromaDB",
         "tools": 5,
     }
