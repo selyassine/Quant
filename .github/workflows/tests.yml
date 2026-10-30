@@ -1,0 +1,22 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: quantai-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Seules les dépendances des modules testés : l'installation complète
+      # (PyTorch, PostgreSQL…) n'est pas nécessaire pour les tests unitaires.
+      - run: pip install pandas==2.2.2 numpy==1.26.4 loguru==0.7.2 pytest
+      - run: pytest -v
