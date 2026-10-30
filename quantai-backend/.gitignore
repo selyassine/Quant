@@ -13,3 +13,6 @@ build/
 *.log
 postgres_data/
 .DS_Store
+
+# Celery beat
+celerybeat-schedule*

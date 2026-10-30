@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
 
     # Alpaca
-    alpaca_api_key: str = "PKTI2M4TXHL42L7ZCVEV63OGEX"
-    alpaca_secret_key: str = "H2JjcEfi4rhwHiR8wr1jdGKdcsPwusF5ERmBsYvB81s"
+    alpaca_api_key: str = ""  # à définir dans .env (ALPACA_API_KEY)
+    alpaca_secret_key: str = ""  # à définir dans .env (ALPACA_SECRET_KEY)
     alpaca_base_url: str = "https://paper-api.alpaca.markets/v2"
 
     @property

@@ -1,270 +1,129 @@
-# 📈 QuantAI — Plateforme IA de Trading Quantitatif & Gestion de Portefeuille
+# QuantAI — Plateforme de trading quantitatif et de gestion de portefeuille
 
-> Plateforme full-stack combinant trading algorithmique, intelligence artificielle et analyse de portefeuille en temps quasi-réel, pensée pour le paper trading, le backtesting et l'assistance décisionnelle par IA.
+**Plateforme full-stack de simulation : prévisions par ensemble de modèles ML, optimisation de portefeuille, backtesting de stratégies sans code, paper trading connecté à Alpaca et assistant IA à outils.**
 
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)
+![LightGBM](https://img.shields.io/badge/LightGBM-02569B)
+![Next.js](https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Licence MIT](https://img.shields.io/badge/licence-MIT-green)
 
----
+> Projet personnel. Environnement de **paper trading uniquement** (aucun capital réel), sur données **journalières** : ce n'est pas un système de trading haute fréquence ni un conseil en investissement.
 
-## 📋 Table des matières
+## En bref
 
-- [Aperçu](#-aperçu)
-- [Fonctionnalités](#-fonctionnalités)
-- [Architecture](#-architecture)
-- [Stack technique](#-stack-technique)
-- [Modules de la plateforme](#-modules-de-la-plateforme)
-- [Structure du projet](#-structure-du-projet)
-- [Installation](#-installation)
-- [Configuration](#-configuration)
-- [Utilisation](#-utilisation)
-- [API](#-api)
-- [Points techniques notables](#-points-techniques-notables)
-- [Limites connues](#-limites-connues--avertissements)
-- [Roadmap](#-roadmap)
-- [Licence](#-licence)
+- **Prévision de direction** (hausse / baisse) par un **ensemble LightGBM + LSTM + Transformer**, pondéré par l'AUC de validation de chaque modèle, avec **explications SHAP**.
+- **Gestion de portefeuille** : optimisation de **Markowitz** et modèle de **Black-Litterman** ; mesures de risque complètes (VaR et CVaR à 95 %, Sharpe, Sortino, Calmar, drawdown maximal, bêta et alpha).
+- **Stratégies sans code** : règles combinant RSI, MACD, moyennes mobiles simples et exponentielles, ATR, stochastique, VWAP… ; stratégies prêtes à l'emploi (RSI Mean Reversion, MACD Crossover, Golden Cross…) et **backtest** avec courbe d'équité.
+- **Agent de trading** : propose des ordres à partir de l'ensemble de modèles, avec filtres de risque ; **chaque ordre est validé ou refusé par l'utilisateur**.
+- **Assistant IA** (Groq, Llama 3.3 70B) avec **RAG** (ChromaDB, optionnel) et 5 outils : prédiction, optimisation de portefeuille, backtest, sentiment des actualités, explication SHAP.
+- **Production** : API FastAPI (14 modules, 60+ endpoints), PostgreSQL, Celery + Redis pour les tâches lourdes, suivi MLOps des modèles, rapports PDF (ReportLab), le tout lancé par Docker Compose.
 
----
-
-## 🎯 Aperçu
-
-**QuantAI** est une plateforme complète de simulation de trading quantitatif permettant de :
-- Construire des stratégies de trading **sans code**, à partir d'indicateurs techniques.
-- **Backtester** ces stratégies sur données historiques avec courbes d'équité et métriques de performance.
-- Suivre un portefeuille de **paper trading** (compte virtuel de 100 000 $).
-- Recevoir des **prix en temps quasi-réel** via un flux SSE connecté à Alpaca.
-- Dialoguer avec un **assistant IA financier** (propulsé par l'API Claude) capable d'interroger le portefeuille, lancer des prédictions, expliquer des backtests, résumer l'actualité ou interpréter des scores SHAP.
-- Déléguer certaines décisions à un **agent de trading autonome** basé sur un ensemble de modèles ML, avec workflow de validation humaine (accepter/refuser).
-- Générer des **rapports PDF professionnels** (portefeuille, backtest, plateforme complète).
-
-Le projet a été développé **module par module**, avec un cycle complet build → debug → déploiement à chaque étape, jusqu'à son achèvement.
-
----
-
-## ✨ Fonctionnalités
-
-| Domaine | Fonctionnalités |
-|---|---|
-| **Trading** | Paper trading (100k$ virtuels), suivi ordres/positions/P&L, connexion Alpaca Paper Trading |
-| **Stratégies** | Générateur no-code, 30+ indicateurs techniques, 5 stratégies préconfigurées |
-| **Backtesting** | Simulation historique, courbes d'équité, métriques (Sharpe, drawdown, win rate, profit factor) |
-| **Données live** | Flux de prix quasi-temps réel via SSE (~2 sec), streaming type WebSocket |
-| **IA** | Assistant conversationnel (API Claude) avec 5 outils financiers intégrés |
-| **Agent autonome** | Génération d'ordres par ensemble ML, validation humaine avant exécution |
-| **Reporting** | Export PDF (ReportLab) : rapport portefeuille, rapport backtest, rapport plateforme complet |
-| **Interface** | 15 pages Next.js, navigation complète, visualisations Recharts |
-
----
-
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌─────────────────────────────┐        ┌──────────────────────────────┐
-│      quantai-frontend        │  HTTP  │        quantai-backend         │
-│  Next.js 14 · TS · Tailwind  │◄──────►│  FastAPI · SQLAlchemy · Celery │
-│  Recharts · 15 pages · SSE   │  SSE   │  PostgreSQL · Redis            │
-└───────────────┬──────────────┘        └───────────────┬────────────────┘
-                │                                        │
-                │                                        ▼
-                │                          ┌──────────────────────────┐
-                │                          │   Services externes        │
-                │                          │  - Alpaca Paper Trading    │
-                │                          │  - API Claude (Anthropic)  │
-                │                          │  - Yahoo Finance (données) │
-                │                          └──────────────────────────┘
+┌──────────────────────────────┐        ┌────────────────────────────────────┐
+│        quantai-frontend       │  HTTP  │            quantai-backend           │
+│  Next.js 14 · TypeScript      │◄──────►│  FastAPI · SQLAlchemy · Pydantic v2 │
+│  Tailwind · Recharts · SSE    │  SSE   │  Celery worker + beat · Redis        │
+└──────────────────────────────┘        │  PostgreSQL                           │
+                                         └──────────────────┬─────────────────┘
+                                                            │
+             ┌──────────────────────────────┬───────────────┴─────────────┬──────────────────────┐
+             ▼                              ▼                             ▼                      ▼
+   Modèles ML (LightGBM,          Portefeuille et risque        Alpaca Paper Trading       Groq (LLM) + RAG
+   LSTM, Transformer, SHAP)       (Markowitz, Black-Litterman)  (ordres, flux de prix)     Yahoo Finance (données)
 ```
 
-- **Deux dépôts séparés** : `quantai-backend` et `quantai-frontend`.
-- **Environnement de développement** : Windows + Docker (conteneurs isolés pour l'API, la base de données, Redis et les workers Celery).
-- **Tâches asynchrones** : Celery + Redis pour les traitements lourds (backtests, entraînement de modèles, génération de rapports).
+## Modules
 
----
+| Module | Ce qu'il fait | Endpoint |
+| --- | --- | --- |
+| Données de marché | Historique OHLCV (Yahoo Finance), indicateurs techniques | `/api/v1/market` |
+| Prédiction | Ensemble LightGBM + LSTM + Transformer par actif | `/api/v1/predict` |
+| Explicabilité | Valeurs SHAP des décisions du modèle | `/api/v1/explain` |
+| Portefeuille | Markowitz, Black-Litterman, mesures de risque | `/api/v1/portfolio` |
+| Stratégies | Constructeur de règles sans code, stratégies prêtes à l'emploi | `/api/v1/strategy` |
+| Backtesting | Simulation historique, courbe d'équité, Sharpe, drawdown, taux de réussite | `/api/v1/backtest` |
+| Actualités | Collecte et analyse de sentiment | `/api/v1/news` |
+| Paper trading | Compte virtuel de 100 000 $, ordres, positions, P&L | `/api/v1/paper` |
+| Temps quasi réel | Flux de prix Alpaca diffusé en SSE | `/api/v1/realtime` |
+| Agent | Propositions d'ordres, validation humaine | `/api/v1/agent` |
+| Assistant IA | Chat Groq + RAG + 5 outils financiers | `/api/v1/assistant` |
+| Analytique | Statistiques de la plateforme | `/api/v1/analytics` |
+| MLOps | Registre des modèles entraînés, suivi des prédictions | `/api/v1/mlops` |
+| Rapports | Export PDF (portefeuille, backtest, plateforme) | `/api/v1/report` |
 
-## 🛠️ Stack technique
+La documentation interactive complète (OpenAPI) est disponible sur `http://localhost:8000/docs` une fois l'API lancée.
 
-### Backend
-- **FastAPI** — framework API principal
-- **PostgreSQL** — base de données relationnelle (comptes, ordres, positions, stratégies)
-- **Redis** — cache et broker de messages
-- **Celery** — traitement asynchrone (backtests, tâches longues)
-- **SQLAlchemy** — ORM
-- **pydantic-settings v2** — gestion de la configuration
-- **ReportLab** — génération de PDF
-- **Alpaca API** — trading papier et streaming de prix
-- **API Claude (Anthropic)** — assistant IA financier
+## Installation
 
-### Frontend
-- **Next.js 14**
-- **TypeScript**
-- **Tailwind CSS**
-- **Recharts** — visualisation de données (courbes d'équité, portefeuille, indicateurs)
-- **SSE (Server-Sent Events)** — flux de prix en direct
+Prérequis : Docker et Docker Compose, Node.js 18 ou plus, une clé Alpaca Paper Trading (gratuite) et une clé Groq (gratuite).
 
----
+```bash
+git clone https://github.com/selyassine/Quant.git
+cd Quant/quantai-backend
+cp .env.example .env          # renseigner ALPACA_API_KEY, ALPACA_SECRET_KEY et GROQ_API_KEY
+docker compose up --build     # API, PostgreSQL, Redis, worker et planificateur Celery
+```
 
-## 🧩 Modules de la plateforme
+Charger les données historiques fournies (9 actifs : AAPL, MSFT, GOOGL, NVDA, TSLA, SPY, QQQ, BTC, ETH) :
 
-| Module | Description |
-|---|---|
-| **M4 — Strategy Builder** | Moteur de règles no-code, 30+ indicateurs techniques, 5 stratégies préconfigurées, backtesting avec courbes d'équité |
-| **M9 — Paper Trading** | Compte virtuel de 100 000 $, modèles SQLAlchemy, suivi des ordres/positions/P&L |
-| **M11 — Assistant IA Financier** | Chatbot propulsé par l'API Claude avec 5 outils : prédiction, portefeuille, backtest, actualités, interprétation SHAP |
-| **M14 — Générateur de rapports** | Export PDF réel via ReportLab (rapport Portefeuille, rapport Backtest, rapport Plateforme complet) |
-| **Intégration Alpaca** | Streaming de prix en direct via SSE, compte Alpaca Paper Trading connecté (endpoint `https://paper-api.alpaca.markets/v2`), mises à jour toutes les ~2 secondes |
-| **Agent de trading autonome** | Génération d'ordres pilotée par un ensemble de modèles ML, avec workflow d'acceptation/refus par l'utilisateur |
+```bash
+docker cp scripts/market_data_csv quantai_api:/app/scripts/market_data_csv
+docker exec quantai_api python scripts/import_csv.py
+```
 
-### Pages frontend (15 pages)
-Incluant notamment `RealtimePage` (prix en direct), `AssistantPage` (chat IA) et `AgentPage` (agent autonome), toutes intégrées à la navigation principale (Sidebar).
+Puis le frontend :
 
----
+```bash
+cd ../quantai-frontend
+npm install
+npm run dev                   # http://localhost:3000
+```
 
-## 📁 Structure du projet
+## Structure du dépôt
 
 ```
 quantai-backend/
 ├── app/
-│   ├── api/                # Routes FastAPI (trading, strategies, backtest, assistant, agent, reports)
-│   ├── models/              # Modèles SQLAlchemy (comptes, ordres, positions, stratégies)
-│   ├── services/            # Logique métier (Alpaca, Claude, ML, reporting)
-│   ├── ml/                  # Modèles ML pour l'agent autonome et les prédictions
-│   ├── core/                 # Config (pydantic-settings), sécurité, dépendances
-│   └── worker/                # Tâches Celery
-├── alembic/                  # Migrations base de données
-├── tests/
+│   ├── api/endpoints/      # un fichier par module (routes FastAPI)
+│   ├── core/config.py      # configuration (pydantic-settings, lue depuis .env)
+│   ├── db/                 # modèles SQLAlchemy et connexion
+│   ├── schemas/            # schémas Pydantic
+│   ├── services/           # logique métier : ml/, portfolio/, risk/, strategy/, backtest/,
+│   │                       # paper_trading/, alpaca/, assistant/, rag/, news/, mlops/, reports/ …
+│   └── tasks/              # tâches Celery
+├── scripts/                # téléchargement et import des données historiques
 ├── docker-compose.yml
 └── requirements.txt
 
-quantai-frontend/
-├── app/                       # 15 pages (Dashboard, Strategies, Backtest, Realtime, Assistant, Agent, Reports, ...)
-├── components/                # Composants réutilisables (StatCard, charts, etc.)
-├── lib/                       # Clients API, utilitaires SSE
-├── styles/                    # Tailwind config
-└── package.json
+quantai-frontend/src/
+├── app/                    # routes Next.js (accueil, inscription)
+├── components/             # une page par module (Dashboard, Predict, Portfolio, Strategy, Backtest, Agent…)
+├── contexts/               # authentification
+└── lib/api.ts              # client de l'API
 ```
 
----
+## Choix techniques et difficultés résolues
 
-## 🚀 Installation
+- **Pondération de l'ensemble** : chaque modèle pèse selon son AUC de validation ; quand un seul modèle est entraîné pour un actif, l'agent assouplit ses filtres de confiance au lieu d'exiger un accord entre modèles.
+- **Yahoo Finance bloque les IP des conteneurs Docker** : les données sont téléchargées sur la machine hôte, puis importées dans PostgreSQL par script.
+- **PyTorch en version CPU** : image Docker environ 4 fois plus légère (environ 200 Mo au lieu de 780 Mo).
+- **Configuration sans secret dans le code** : toutes les clés sont lues depuis `.env`, jamais versionné.
 
-### Prérequis
-- Docker & Docker Compose
-- Node.js 18+ (si exécution du frontend hors conteneur)
-- Compte Alpaca Paper Trading (clé API)
-- Clé API Anthropic (Claude)
+## Limites
 
-### 1. Cloner les dépôts
-```bash
-git clone <url-quantai-backend>
-git clone <url-quantai-frontend>
-```
+- Données journalières (fin de séance) : le flux « temps réel » rafraîchit les prix toutes les deux secondes environ, mais les modèles raisonnent sur des barres quotidiennes.
+- Paper trading uniquement.
+- Pas encore de suite de tests automatisés : c'est la prochaine étape prévue.
 
-### 2. Backend
-```bash
-cd quantai-backend
-cp .env.example .env   # renseigner les variables (voir Configuration)
-docker compose up --build
-```
-Le backend expose l'API sur `http://localhost:8000` (docs interactives sur `/docs`).
+## Licence
 
-### 3. Frontend
-```bash
-cd quantai-frontend
-npm install
-npm run dev
-```
-Le frontend est disponible sur `http://localhost:3000`.
+Distribué sous licence MIT : voir [`LICENSE`](LICENSE).
 
 ---
 
-## ⚙️ Configuration
-
-Variables d'environnement principales (`.env` du backend) :
-
-```env
-# Base de données
-POSTGRES_USER=quantai
-POSTGRES_PASSWORD=********
-POSTGRES_DB=quantai_db
-DATABASE_URL=postgresql://quantai:********@db:5432/quantai_db
-
-# Redis / Celery
-REDIS_URL=redis://redis:6379/0
-
-# Alpaca Paper Trading
-ALPACA_API_KEY=********
-ALPACA_SECRET_KEY=********
-ALPACA_BASE_URL=https://paper-api.alpaca.markets/v2
-
-# Anthropic (Assistant IA)
-ANTHROPIC_API_KEY=********
-```
-
-
----
-
-## 💻 Utilisation
-
-1. **Créer/consulter le compte de paper trading** (100 000 $ virtuels par défaut).
-2. **Construire une stratégie** dans le Strategy Builder à partir des indicateurs disponibles, ou partir d'une des 5 stratégies préconfigurées.
-3. **Backtester** la stratégie sur des données historiques et analyser la courbe d'équité, le Sharpe ratio, le max drawdown, le win rate et le profit factor.
-4. **Suivre les prix en direct** sur la page Realtime (flux SSE Alpaca).
-5. **Interroger l'assistant IA** pour des analyses de portefeuille, des prédictions, des résumés d'actualité ou des explications SHAP.
-6. **Activer l'agent autonome** pour recevoir des propositions d'ordres générées par le modèle ML, à valider ou refuser manuellement.
-7. **Exporter un rapport PDF** (portefeuille, backtest ou plateforme complète) depuis le module de reporting.
-
----
-
-## 🔌 API
-
-La documentation interactive complète (Swagger/OpenAPI) est générée automatiquement par FastAPI et disponible sur :
-
-```
-http://localhost:8000/docs
-```
-
-Grandes familles d'endpoints :
-- `POST /trading/orders` — passage d'ordres (paper trading)
-- `GET /portfolio` — état du portefeuille (positions, P&L)
-- `POST /strategies` / `POST /backtest` — création et backtest de stratégies
-- `GET /realtime/stream` — flux SSE des prix
-- `POST /assistant/chat` — assistant IA financier
-- `POST /agent/propose` / `POST /agent/decision` — agent autonome (proposition/validation)
-- `GET /reports/{type}` — génération de rapports PDF
-
----
-
-## 🔍 Points techniques notables
-
-- **Honnêteté sur la granularité des données** : la plateforme fonctionne sur des données **fin de journée (end-of-day)**, pas du tick-level temps réel — une distinction importante à garder en tête lors de l'évaluation des fonctionnalités "temps réel".
-- **Métriques d'évaluation** des stratégies : Sharpe ratio, max drawdown, win rate, profit factor.
-- **Correctifs notables résolus pendant le développement** :
-  - Contournement du blocage des IP Docker par Yahoo Finance : téléchargement du CSV en local puis import dans le conteneur.
-  - Clé dupliquée sur `paper_accounts` : gérée par un pattern try/except avec rollback.
-  - Erreurs de rendu React liées aux objets passés en enfants : conversion des éléments de `tools_used` en chaînes et encapsulation des valeurs de `StatCard` avec `String()`.
-  - Bug d'affichage de `avg_confidence` (ex. 5716% au lieu de 57.16%) : correction par un seuil de vérification (`> 1`) avant multiplication par 100.
-
----
-
-## ⚠️ Limites connues / avertissements
-
-- Données **end-of-day**, pas tick-level : les décisions basées sur ce système ne reflètent pas une exécution en temps réel de marché réel.
-- Environnement de **paper trading uniquement** (compte Alpaca simulé) — aucune exécution sur capital réel.
-- Nécessite des clés API valides (Alpaca + Anthropic) pour l'ensemble des fonctionnalités.
-
----
-
-## 🗺️ Roadmap (pistes d'évolution possibles)
-
-- Passage à des données de marché tick-level / temps réel réel.
-- Support multi-comptes et multi-devises.
-- Élargissement du catalogue d'indicateurs et de stratégies préconfigurées.
-- Déploiement cloud (au-delà de l'environnement Docker local).
-- Tests automatisés end-to-end plus poussés.
-
----
-
-## 📄 Licence
-
-Ce projet est distribué sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
----
-
-<p align="center">Développé par <strong>Yassine</strong> — plateforme QuantAI</p>
+Réalisé par **Yassine Selmi** — [github.com/selyassine](https://github.com/selyassine)
