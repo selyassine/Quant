@@ -197,7 +197,6 @@ ALPACA_BASE_URL=https://paper-api.alpaca.markets/v2
 ANTHROPIC_API_KEY=********
 ```
 
-> ⚠️ Avec **pydantic-settings v2**, chaque variable `.env` doit être explicitement déclarée dans le modèle de configuration, avec `extra: "ignore"` pour éviter les erreurs de validation sur les champs non déclarés.
 
 ---
 
