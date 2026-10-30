@@ -9,6 +9,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# En dessous de ce seuil, un écart-type est traité comme nul : sur des rendements
+# constants, le calcul flottant donne ~1e-19 au lieu de 0, et le ratio explosait (~7e16).
+_EPS = 1e-12
+
 
 class RiskMetrics:
     """
@@ -120,7 +124,7 @@ class RiskMetrics:
         > 1 = bon, > 2 = très bon, > 3 = excellent
         """
         excess = r - daily_rf
-        if r.std() == 0:
+        if not r.std() > _EPS:   # volatilité nulle (ou bruit numérique) : ratio non défini
             return 0.0
         return float(round(excess.mean() / r.std() * np.sqrt(252), 4))
 
@@ -131,7 +135,7 @@ class RiskMetrics:
         """
         excess = r - daily_rf
         downside = r[r < 0].std()
-        if downside == 0:
+        if not downside > _EPS:   # aucune baisse, une seule, ou toutes identiques
             return 0.0
         return float(round(excess.mean() / downside * np.sqrt(252), 4))
 
