@@ -2,6 +2,7 @@
 
 **Plateforme full-stack de simulation : prévisions par ensemble de modèles ML, optimisation de portefeuille, backtesting de stratégies sans code, paper trading connecté à Alpaca et assistant IA à outils.**
 
+[![Tests](https://github.com/selyassine/Quant/actions/workflows/tests.yml/badge.svg)](https://github.com/selyassine/Quant/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)
@@ -118,7 +119,7 @@ quantai-frontend/src/
 
 - Données journalières (fin de séance) : le flux « temps réel » rafraîchit les prix toutes les deux secondes environ, mais les modèles raisonnent sur des barres quotidiennes.
 - Paper trading uniquement.
-- Pas encore de suite de tests automatisés : c'est la prochaine étape prévue.
+- Tests unitaires sur les mesures de risque et le moteur de stratégies (`quantai-backend/tests`, lancés par GitHub Actions) ; les services connectés à Alpaca, à la base et aux modèles ne sont pas encore couverts.
 
 ## Licence
 
