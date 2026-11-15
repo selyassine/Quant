@@ -2,6 +2,8 @@
 
 **Plateforme full-stack de simulation : prévisions par ensemble de modèles ML, optimisation de portefeuille, backtesting de stratégies sans code, paper trading connecté à Alpaca et assistant IA à outils.**
 
+> **In English.** QuantAI is a full-stack simulation platform for quantitative trading and portfolio management: direction forecasts from a LightGBM + LSTM + Transformer ensemble with SHAP explanations, Markowitz and Black-Litterman optimisation, risk measures (VaR, CVaR, Sharpe, Sortino, drawdown), no-code strategy backtesting, and a trading agent whose every order must be approved by the user. Paper trading only (Alpaca), on daily data: this is neither a high-frequency system nor investment advice. Personal project; documentation is in French.
+
 [![Tests](https://github.com/selyassine/Quant/actions/workflows/tests.yml/badge.svg)](https://github.com/selyassine/Quant/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
