@@ -26,6 +26,10 @@
 
 ## Aperçu
 
+| Backtesting : comparaison des stratégies | Optimisation de portefeuille (Markowitz) |
+| :-: | :-: |
+| <img src="docs/images/interface_backtesting.png" alt="Page de backtesting : quatre stratégies comparées sur AAPL" width="100%"> | <img src="docs/images/interface_portefeuille.png" alt="Page d'optimisation de portefeuille : allocation et métriques de risque" width="100%"> |
+
 <p align="center">
   <img src="docs/images/backtest_aapl.png" alt="Backtest des stratégies prédéfinies sur AAPL" width="100%">
 </p>
